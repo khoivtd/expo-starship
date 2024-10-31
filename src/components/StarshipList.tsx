@@ -1,25 +1,28 @@
-import React, { FC } from "react";
-import { FlatList, View } from "react-native";
-import StarshipItem from "./StarshipItem";
-import { Starship } from "@/redux/starshipSlice";
+import type React from 'react';
+import { useCallback } from 'react';
+import { FlatList, View } from 'react-native';
 
-interface Props {
+import type { Starship } from '@/redux/starship.slice';
+
+import StarshipItem from './StarshipItem';
+
+type StarshipListProps = {
   starshipList: Starship[];
-}
+};
 
-const StarshipList: FC<Props> = ({ starshipList }) => {
-  const onRenderItem = (starshipItem: Starship) => {
+const StarshipList: React.FC<StarshipListProps> = ({ starshipList }) => {
+  const onRenderItem = useCallback((starshipItem: Starship) => {
     return (
-      <View style={{ paddingVertical: 10, }}>
+      <View style={{ paddingVertical: 10 }}>
         <StarshipItem starship={starshipItem} />
       </View>
     );
-  };
+  }, []);
 
   return (
     <FlatList
       data={starshipList}
-      keyExtractor={(item) => item.url}
+      keyExtractor={(item) => item.id}
       renderItem={({ item }) => onRenderItem(item)}
     />
   );

@@ -1,35 +1,38 @@
-import React, { FC } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createStackNavigator } from '@react-navigation/stack';
-import { QueryClient, QueryClientProvider } from 'react-query'
+import type React from 'react';
+import { useEffect } from 'react';
+import { useDispatch } from 'react-redux';
+
+import { loadFavorites } from '@/redux/starship.slice';
 import HomeScreen from '@/screens/HomeScreen';
-import FavoriteScreen from '@/screens/FavoriteScreen';
 
 const Stack = createStackNavigator();
 
-const queryClient = new QueryClient()
+const AppNavigator: React.FC = () => {
+  const dispatch = useDispatch();
 
-const AppNavigator: FC = () => {
+  useEffect(() => {
+    const fetchFavorites = async () => {
+      const favorites = await AsyncStorage.getItem('favorites');
+      if (favorites) {
+        dispatch(loadFavorites(JSON.parse(favorites)));
+      }
+    };
+
+    fetchFavorites();
+  }, [dispatch]);
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <Stack.Navigator
-        initialRouteName="Home"
-      >
-        <Stack.Screen
-          name="Home"
-          options={{
-            title: 'Home',
-          }}
-          component={HomeScreen}
-        />
-        <Stack.Screen
-          name="Favorites"
-          options={{
-            title: 'Favorites',
-          }}
-          component={FavoriteScreen} />
-      </Stack.Navigator>
-  </QueryClientProvider>
+    <Stack.Navigator initialRouteName="Home">
+      <Stack.Screen
+        name="Home"
+        options={{
+          title: 'Home',
+        }}
+        component={HomeScreen}
+      />
+    </Stack.Navigator>
   );
 };
 

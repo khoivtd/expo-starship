@@ -1,35 +1,40 @@
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import type { PayloadAction } from '@reduxjs/toolkit';
+import { createSlice } from '@reduxjs/toolkit';
 
-export interface Starship {
+export type Starship = {
+  id: string;
   name: string;
   model: string;
+  manufacturers: Array<string>;
+  costInCredits: number;
+  length: number;
+  crew: string;
   passengers: string;
-  starship_class: string;
-  manufacturer: string;
-  MGLT: string;
-  hyperdrive_rating: string;
+  cargoCapacity: number;
   consumables: string;
-  url: string;
+  hyperdriveRating: number;
+  MGLT: number;
+  starshipClass: string;
   created: string;
   edited: string;
-}
+};
 
-interface StarshipState {
+type StarshipState = {
   favorites: Starship[];
-}
+};
 
 const initialState: StarshipState = {
   favorites: [],
 };
 
 const starshipSlice = createSlice({
-  name: "starship",
+  name: 'starship',
   initialState,
   reducers: {
     addFavorite: (state, action: PayloadAction<Starship>) => {
       state.favorites.push(action.payload);
-      AsyncStorage.setItem("favorites", JSON.stringify(state.favorites));
+      AsyncStorage.setItem('favorites', JSON.stringify(state.favorites));
     },
     loadFavorites: (state, action: PayloadAction<Starship[]>) => {
       state.favorites = action.payload;

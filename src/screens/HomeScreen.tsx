@@ -1,67 +1,67 @@
-import React, { useEffect, useState } from "react";
-import { View, TextInput, Text } from "react-native";
-import axios from "axios";
-import { useQuery } from "react-query";
-import StarshipItem from "@/components/StarshipItem";
-import { LoadingIndicator } from "@/components/LoadingIndicator";
+import { useQuery } from '@apollo/client';
+import type React from 'react';
+import { useState } from 'react';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useSelector } from 'react-redux';
 
-const endpoint = "https://swapi.dev/api";
+import { LoadingIndicator } from '@/components/LoadingIndicator';
+import SearchBar from '@/components/SearchBar';
+import StarshipItem from '@/components/StarshipItem';
+import StarshipList from '@/components/StarshipList';
+import { GET_ALL_STARSHIP } from '@/graphql/queries';
+import type { RootState } from '@/redux/store';
+
+const styles = StyleSheet.create({
+  container: {
+    padding: 16,
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+  },
+  section: {
+    marginVertical: 8,
+  },
+});
 
 const HomeScreen: React.FC = () => {
-  const [starshipId, setStarshipId] = useState("");
-  const [isSearching, setSearching] = useState(false);
+  const [searchStarship, setSearchStarship] = useState('');
 
-  const { data, isLoading, error } = useQuery("launches", () => {
-    return axios({
-      url: endpoint + "/starships/" + starshipId,
-      method: "GET",
-    }).then((response) => {
-      return response.data;
-    });
-  });
+  const favorites = useSelector((state: RootState) => state.starship.favorites);
 
-  useEffect(() => {
-    if (data && !data.hasOwnProperty("count") && isSearching) {
-      setSearching(false);
-    }
-  }, [isSearching, data]);
+  const { loading, error, data } = useQuery(GET_ALL_STARSHIP);
 
-  if (isLoading) return <Text>Loading...</Text>;
-  if (error) return <Text>Error loading starship</Text>;
+  if (loading) return <LoadingIndicator />;
+  if (error) return <Text>Error loading Starship list</Text>;
 
-  const onChangeText = (text: string) => {
-    setStarshipId(text);
-    setSearching(true);
-  };
-
-  console.log(
-    "HomeScreen starshipId = ",
-    starshipId
-  );
-
-  console.log(
-    "HomeScreen data = ",
-    data
+  const filteredStarshipList = data?.allStarships?.starships?.filter(
+    (spaceship: any) =>
+      spaceship.name.toLowerCase().includes(searchStarship.toLowerCase()),
   );
 
   return (
-    <View style={{ padding: 20 }}>
-      <TextInput
-        style={{ padding: 20, borderWidth: 1, borderColor: "#ccc" }}
-        placeholder="Search with starship ID"
-        value={starshipId}
-        onChangeText={onChangeText}
-        editable={!isSearching}
-      />
-      {starshipId !== "" && !data.hasOwnProperty("count") && (
-        <View style={{ paddingVertical: 20 }}>
-          <StarshipItem starship={data} />
-        </View>
-      )}
-      {isSearching &&
-        <LoadingIndicator />
-      }
-    </View>
+    <ScrollView bounces={false} showsVerticalScrollIndicator={false}>
+      <View style={styles.container}>
+        <SearchBar
+          searchStarship={searchStarship}
+          setSearchStarship={setSearchStarship}
+        />
+
+        <Text style={styles.section}>Search result:</Text>
+
+        {filteredStarshipList && filteredStarshipList.length === 1 && (
+          <View style={styles.section}>
+            <StarshipItem starship={filteredStarshipList[0]} />
+          </View>
+        )}
+
+        <Text style={styles.section}>Favorites:</Text>
+
+        {favorites && favorites.length > 0 && (
+          <View style={styles.section}>
+            <StarshipList starshipList={favorites} />
+          </View>
+        )}
+      </View>
+    </ScrollView>
   );
 };
 

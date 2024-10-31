@@ -1,5 +1,6 @@
-import { configureStore } from "@reduxjs/toolkit";
-import starshipReducer from "./starshipSlice";
+import { configureStore } from '@reduxjs/toolkit';
+
+import starshipReducer from './starship.slice';
 
 export const store = configureStore({
   reducer: {
